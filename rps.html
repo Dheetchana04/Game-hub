@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rock Paper Scissors — Game Hub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="loading-screen">
+  <div class="loader-logo">RPS</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+</div>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">🕹️ GAME HUB</a>
+    <div class="ms-auto d-flex gap-2">
+      <button id="sound-toggle" class="theme-toggle border-0">🔊</button>
+      <button id="theme-toggle" class="theme-toggle">☀️ <span>LIGHT</span></button>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="game-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <a href="index.html" class="back-btn mb-2 d-inline-flex">← BACK TO HUB</a>
+      <h1 class="game-page-title">ROCK <span>PAPER SCISSORS</span></h1>
+    </div>
+    <div class="difficulty-tabs">
+      <button class="diff-tab active" data-rounds="3">BEST OF 3</button>
+      <button class="diff-tab" data-rounds="5">BEST OF 5</button>
+      <button class="diff-tab" data-rounds="7">BEST OF 7</button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4 col-md-5">
+      <div class="score-panel">
+        <div class="score-title">MATCH SCORE</div>
+        <div class="score-nums">
+          <div class="score-num-item">
+            <div class="score-num-value win-color" id="score-you">0</div>
+            <div class="score-num-label">YOU</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value draw-color" id="score-tie">0</div>
+            <div class="score-num-label">TIES</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value lose-color" id="score-cpu">0</div>
+            <div class="score-num-label">CPU</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <div style="font-family:var(--font-display);font-size:0.65rem;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:6px">SERIES</div>
+          <div id="series-bar" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+          <div style="font-family:var(--font-display);font-size:0.7rem;color:var(--text-secondary);margin-top:8px">Round <span id="round-num">1</span> of <span id="total-rounds">3</span></div>
+        </div>
+      </div>
+
+      <div class="score-panel">
+        <div class="score-title">ALL-TIME RECORD</div>
+        <div class="score-nums">
+          <div class="score-num-item">
+            <div class="score-num-value win-color" id="all-wins">0</div>
+            <div class="score-num-label">WINS</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value draw-color" id="all-draws">0</div>
+            <div class="score-num-label">DRAWS</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value lose-color" id="all-losses">0</div>
+            <div class="score-num-label">LOSSES</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="instructions-box">
+        <strong>HOW TO PLAY</strong>
+        Rock beats Scissors · Scissors beats Paper · Paper beats Rock<br/><br/>
+        Choose a series length and try to win the majority of rounds before the CPU does!
+      </div>
+      <button class="btn-neon btn-neon-pink w-100" id="btn-reset">↺ NEW SERIES</button>
+    </div>
+
+    <div class="col-lg-8 col-md-7">
+      <!-- Arena display -->
+      <div class="rps-arena">
+        <div style="text-align:center">
+          <div class="rps-label" style="margin-bottom:8px">YOU</div>
+          <div class="rps-player-choice" id="choice-you">
+            <span id="choice-you-emoji" style="font-size:2.5rem">❓</span>
+          </div>
+        </div>
+        <div class="rps-vs">VS</div>
+        <div style="text-align:center">
+          <div class="rps-label" style="margin-bottom:8px">CPU</div>
+          <div class="rps-cpu-choice" id="choice-cpu">
+            <span id="choice-cpu-emoji" style="font-size:2.5rem">❓</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result text -->
+      <div class="rps-result" id="rps-result" style="color:var(--text-muted)">Make your choice!</div>
+
+      <!-- Countdown display -->
+      <div id="countdown-display" style="font-family:var(--font-display);font-size:3rem;font-weight:900;text-align:center;color:var(--neon-cyan);min-height:60px;margin:8px 0"></div>
+
+      <!-- Choices -->
+      <div class="rps-choices" id="rps-choices">
+        <button class="rps-btn" data-choice="rock">
+          🪨
+          <span class="label">ROCK</span>
+        </button>
+        <button class="rps-btn" data-choice="paper">
+          📄
+          <span class="label">PAPER</span>
+        </button>
+        <button class="rps-btn" data-choice="scissors">
+          ✂️
+          <span class="label">SCISSORS</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Result Modal -->
+<div class="modal fade" id="result-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body py-4">
+        <span class="result-emoji" id="modal-emoji">🏆</span>
+        <div class="result-title" id="modal-title">YOU WIN!</div>
+        <div class="result-subtitle" id="modal-subtitle">Dominated the series!</div>
+        <div style="margin-top:16px;font-family:var(--font-display);font-size:0.8rem;color:var(--text-secondary)" id="modal-final-score"></div>
+      </div>
+      <div class="modal-footer justify-content-center border-0 pb-4">
+        <button class="btn-neon btn-neon-pink me-2" id="modal-rematch" data-bs-dismiss="modal">↺ REMATCH</button>
+        <button class="btn-neon btn-neon-purple" onclick="window.location.href='index.html'">← HUB</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/utils.js"></script>
+<script>
+/* ── Rock Paper Scissors ── */
+const CHOICES = ['rock', 'paper', 'scissors'];
+const EMOJIS = { rock:'🪨', paper:'📄', scissors:'✂️' };
+const BEATS = { rock:'scissors', scissors:'paper', paper:'rock' };
+
+let wins=0, losses=0, ties=0;
+let seriesTarget = 3;
+let seriesResults = [];
+let roundActive = true;
+
+const modal = new bootstrap.Modal(document.getElementById('result-modal'));
+
+function initRPS() {
+  wins=0; losses=0; ties=0; seriesResults=[];
+  roundActive = true;
+  document.getElementById('score-you').textContent = 0;
+  document.getElementById('score-tie').textContent = 0;
+  document.getElementById('score-cpu').textContent = 0;
+  document.getElementById('choice-you-emoji').textContent = '❓';
+  document.getElementById('choice-cpu-emoji').textContent = '❓';
+  document.getElementById('rps-result').textContent = 'Make your choice!';
+  document.getElementById('rps-result').style.color = 'var(--text-muted)';
+  document.getElementById('round-num').textContent = 1;
+  document.getElementById('total-rounds').textContent = seriesTarget * 2 - 1;
+  document.getElementById('countdown-display').textContent = '';
+  setButtonsEnabled(true);
+  renderSeriesBar();
+  refreshAllTimeScores();
+}
+
+function setButtonsEnabled(state) {
+  document.querySelectorAll('.rps-btn').forEach(b => {
+    b.style.opacity = state ? '1' : '0.4';
+    b.style.pointerEvents = state ? 'auto' : 'none';
+  });
+}
+
+// Handle choice
+document.querySelectorAll('.rps-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!roundActive) return;
+    playChoice(btn.dataset.choice);
+  });
+});
+
+async function playChoice(playerChoice) {
+  roundActive = false;
+  setButtonsEnabled(false);
+
+  // Animate countdown
+  const cntEl = document.getElementById('countdown-display');
+  for (const txt of ['3','2','1','🎲']) {
+    cntEl.textContent = txt;
+    playSound('tick');
+    await delay(300);
+  }
+  cntEl.textContent = '';
+
+  const cpuChoice = CHOICES[Math.floor(Math.random() * 3)];
+  document.getElementById('choice-you-emoji').textContent = EMOJIS[playerChoice];
+  document.getElementById('choice-cpu-emoji').textContent = EMOJIS[cpuChoice];
+
+  // Animate shake
+  document.getElementById('choice-you').classList.add('rps-shake');
+  document.getElementById('choice-cpu').classList.add('rps-shake');
+  setTimeout(() => {
+    document.getElementById('choice-you').classList.remove('rps-shake');
+    document.getElementById('choice-cpu').classList.remove('rps-shake');
+  }, 500);
+
+  let result;
+  const resultEl = document.getElementById('rps-result');
+
+  if (playerChoice === cpuChoice) {
+    result = 'tie';
+    ties++;
+    resultEl.textContent = "🤝 IT'S A TIE!";
+    resultEl.style.color = 'var(--neon-yellow)';
+    playSound('draw');
+    seriesResults.push('tie');
+    document.getElementById('score-tie').textContent = ties;
+  } else if (BEATS[playerChoice] === cpuChoice) {
+    result = 'win';
+    wins++;
+    resultEl.textContent = `✅ ${playerChoice.toUpperCase()} BEATS ${cpuChoice.toUpperCase()}!`;
+    resultEl.style.color = 'var(--neon-green)';
+    playSound('win');
+    seriesResults.push('win');
+    document.getElementById('score-you').textContent = wins;
+  } else {
+    result = 'lose';
+    losses++;
+    resultEl.textContent = `❌ ${cpuChoice.toUpperCase()} BEATS ${playerChoice.toUpperCase()}!`;
+    resultEl.style.color = 'var(--neon-pink)';
+    playSound('lose');
+    seriesResults.push('lose');
+    document.getElementById('score-cpu').textContent = losses;
+  }
+
+  renderSeriesBar();
+  document.getElementById('round-num').textContent = seriesResults.filter(r=>r!=='tie').length + 1;
+
+  // Check series end
+  if (wins >= seriesTarget || losses >= seriesTarget) {
+    const didWin = wins >= seriesTarget;
+    await delay(600);
+    if (didWin) {
+      incrementScore('rps', 'wins');
+      launchConfetti(40);
+    } else {
+      incrementScore('rps', 'losses');
+    }
+    refreshAllTimeScores();
+    document.getElementById('modal-emoji').textContent = didWin ? '🏆' : '😔';
+    document.getElementById('modal-title').textContent = didWin ? 'YOU WIN THE SERIES!' : 'CPU WINS THE SERIES!';
+    document.getElementById('modal-subtitle').textContent = didWin ? 'Excellent decision-making!' : 'Better luck next time!';
+    document.getElementById('modal-final-score').textContent = `Final: ${wins} — ${losses}`;
+    modal.show();
+  } else {
+    await delay(700);
+    roundActive = true;
+    setButtonsEnabled(true);
+  }
+}
+
+function renderSeriesBar() {
+  const bar = document.getElementById('series-bar');
+  const needed = seriesTarget * 2 - 1;
+  bar.innerHTML = Array.from({length: needed}, (_,i) => {
+    const r = seriesResults[i];
+    const color = r==='win'?'var(--neon-green)':r==='lose'?'var(--neon-pink)':r==='tie'?'var(--neon-yellow)':'var(--glass-border)';
+    return `<div style="width:20px;height:20px;border-radius:4px;background:${color};border:1px solid var(--glass-border)"></div>`;
+  }).join('');
+}
+
+function refreshAllTimeScores() {
+  const s = getScore('rps');
+  document.getElementById('all-wins').textContent = s.wins||0;
+  document.getElementById('all-draws').textContent = s.draws||0;
+  document.getElementById('all-losses').textContent = s.losses||0;
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r,ms)); }
+
+// Difficulty tabs (series length)
+document.querySelectorAll('.diff-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.diff-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    seriesTarget = parseInt(tab.dataset.rounds);
+    initRPS();
+  });
+});
+
+document.getElementById('btn-reset').addEventListener('click', initRPS);
+document.getElementById('modal-rematch').addEventListener('click', initRPS);
+
+document.addEventListener('DOMContentLoaded', initRPS);
+</script>
+</body>
+</html>

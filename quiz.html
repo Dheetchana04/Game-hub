@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trivia Quiz — Game Hub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="loading-screen">
+  <div class="loader-logo">QUIZ</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+</div>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">🕹️ GAME HUB</a>
+    <div class="ms-auto d-flex gap-2">
+      <button id="sound-toggle" class="theme-toggle border-0">🔊</button>
+      <button id="theme-toggle" class="theme-toggle">☀️ <span>LIGHT</span></button>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="game-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <a href="index.html" class="back-btn mb-2 d-inline-flex">← BACK TO HUB</a>
+      <h1 class="game-page-title">TRIVIA <span>QUIZ</span></h1>
+    </div>
+    <div class="difficulty-tabs" id="category-tabs">
+      <button class="diff-tab active" data-cat="mixed">🌐 MIXED</button>
+      <button class="diff-tab" data-cat="science">🔬 SCIENCE</button>
+      <button class="diff-tab" data-cat="history">📜 HISTORY</button>
+      <button class="diff-tab" data-cat="geo">🗺️ GEO</button>
+      <button class="diff-tab" data-cat="tech">💻 TECH</button>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="start-screen">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="score-panel text-center">
+          <div style="font-size:4rem;margin-bottom:16px">🧠</div>
+          <div class="score-title mb-3">BEST SCORES</div>
+          <div class="score-nums justify-content-center">
+            <div class="score-num-item">
+              <div class="score-num-value win-color" id="start-best">0</div>
+              <div class="score-num-label">BEST /10</div>
+            </div>
+            <div class="score-num-item">
+              <div class="score-num-value cyan-color" id="start-total">0</div>
+              <div class="score-num-label">QUIZZES</div>
+            </div>
+          </div>
+          <div class="instructions-box mt-3" style="text-align:left">
+            <strong>HOW TO PLAY</strong>
+            Answer 10 questions. Each question has a 15-second timer. Choose your category or go mixed for random questions from all topics!<br/><br/>
+            🟢 Correct = +1 point · ⏱️ Faster = more style!
+          </div>
+          <button class="btn-neon btn-neon-yellow mt-2 w-100" style="font-size:1rem;padding:14px" id="btn-start-quiz">▶ START QUIZ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Screen -->
+  <div id="quiz-screen" style="display:none">
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-5">
+        <div class="score-panel">
+          <div class="score-title">PROGRESS</div>
+          <div class="score-nums">
+            <div class="score-num-item">
+              <div class="score-num-value win-color" id="q-correct">0</div>
+              <div class="score-num-label">CORRECT</div>
+            </div>
+            <div class="score-num-item">
+              <div class="score-num-value lose-color" id="q-wrong">0</div>
+              <div class="score-num-label">WRONG</div>
+            </div>
+            <div class="score-num-item">
+              <div class="score-num-value cyan-color" id="q-timer">15</div>
+              <div class="score-num-label">SECONDS</div>
+            </div>
+          </div>
+          <!-- Timer bar -->
+          <div class="attempts-bar mt-3">
+            <div id="timer-bar" class="attempts-bar-fill" style="width:100%"></div>
+          </div>
+        </div>
+
+        <div class="score-panel">
+          <div class="score-title">LIFELINES</div>
+          <div class="d-flex flex-column gap-2">
+            <button class="btn-neon btn-neon-purple" id="ll-50" style="font-size:0.7rem">50/50 — Remove 2 Wrong</button>
+            <button class="btn-neon btn-neon-cyan" id="ll-skip" style="font-size:0.7rem">SKIP — Skip Question</button>
+          </div>
+          <div style="font-family:var(--font-display);font-size:0.6rem;letter-spacing:1px;color:var(--text-muted);margin-top:8px">ONE USE EACH PER GAME</div>
+        </div>
+      </div>
+
+      <div class="col-lg-8 col-md-7">
+        <div class="quiz-q-counter" id="q-counter">QUESTION 1 OF 10</div>
+        <div class="quiz-progress mb-3">
+          <div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+        </div>
+        <div class="quiz-question" id="quiz-question">Loading question...</div>
+        <div class="quiz-options" id="quiz-options"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Result Modal -->
+<div class="modal fade" id="result-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body py-4">
+        <span class="result-emoji" id="modal-emoji">🏆</span>
+        <div class="result-title" id="modal-title">QUIZ COMPLETE!</div>
+        <div class="result-subtitle" id="modal-subtitle"></div>
+        <div style="margin-top:20px" id="modal-breakdown"></div>
+      </div>
+      <div class="modal-footer justify-content-center border-0 pb-4">
+        <button class="btn-neon btn-neon-yellow me-2" id="modal-again" data-bs-dismiss="modal">↺ PLAY AGAIN</button>
+        <button class="btn-neon btn-neon-purple" onclick="window.location.href='index.html'">← HUB</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/utils.js"></script>
+<script>
+/* ── Question Bank ── */
+const QUESTIONS = {
+  science: [
+    { q:"What is the chemical symbol for gold?", a:"Au", opts:["Ag","Au","Fe","Cu"] },
+    { q:"How many bones are in the adult human body?", a:"206", opts:["182","206","228","246"] },
+    { q:"What planet is known as the Red Planet?", a:"Mars", opts:["Jupiter","Venus","Mars","Saturn"] },
+    { q:"What is the speed of light (approx)?", a:"300,000 km/s", opts:["150,000 km/s","300,000 km/s","500,000 km/s","1,000 km/s"] },
+    { q:"What gas do plants absorb from the atmosphere?", a:"CO₂", opts:["O₂","N₂","CO₂","H₂"] },
+    { q:"What is the powerhouse of the cell?", a:"Mitochondria", opts:["Nucleus","Ribosome","Mitochondria","Lysosome"] },
+    { q:"What element has the atomic number 1?", a:"Hydrogen", opts:["Helium","Oxygen","Carbon","Hydrogen"] },
+    { q:"What is the largest planet in our solar system?", a:"Jupiter", opts:["Saturn","Neptune","Uranus","Jupiter"] },
+    { q:"What is H₂O more commonly known as?", a:"Water", opts:["Salt","Water","Acid","Oxygen"] },
+    { q:"In which organ does digestion primarily begin?", a:"Mouth", opts:["Stomach","Liver","Intestine","Mouth"] },
+  ],
+  history: [
+    { q:"In what year did World War II end?", a:"1945", opts:["1942","1943","1945","1947"] },
+    { q:"Who was the first US President?", a:"George Washington", opts:["Abraham Lincoln","Thomas Jefferson","George Washington","John Adams"] },
+    { q:"The Great Wall of China was primarily built to protect against which people?", a:"Mongols", opts:["Romans","Persians","Mongols","Huns"] },
+    { q:"In what year did the Berlin Wall fall?", a:"1989", opts:["1985","1987","1989","1991"] },
+    { q:"What empire was ruled by Julius Caesar?", a:"Roman", opts:["Greek","Persian","Ottoman","Roman"] },
+    { q:"Who painted the Mona Lisa?", a:"Leonardo da Vinci", opts:["Michelangelo","Raphael","Leonardo da Vinci","Botticelli"] },
+    { q:"In what year did the Titanic sink?", a:"1912", opts:["1905","1908","1912","1915"] },
+    { q:"The French Revolution began in which year?", a:"1789", opts:["1776","1789","1800","1815"] },
+    { q:"Who was the first person to walk on the moon?", a:"Neil Armstrong", opts:["Buzz Aldrin","Yuri Gagarin","Neil Armstrong","John Glenn"] },
+    { q:"Which ancient wonder was located in Alexandria?", a:"Lighthouse", opts:["Colossus","Lighthouse","Hanging Gardens","Statue of Zeus"] },
+  ],
+  geo: [
+    { q:"What is the capital of Australia?", a:"Canberra", opts:["Sydney","Melbourne","Canberra","Brisbane"] },
+    { q:"What is the longest river in the world?", a:"Nile", opts:["Amazon","Yangtze","Nile","Mississippi"] },
+    { q:"How many continents are there?", a:"7", opts:["5","6","7","8"] },
+    { q:"What is the capital of Japan?", a:"Tokyo", opts:["Osaka","Kyoto","Tokyo","Hiroshima"] },
+    { q:"Which country has the most natural lakes?", a:"Canada", opts:["Russia","USA","Canada","Brazil"] },
+    { q:"What is the smallest country in the world?", a:"Vatican City", opts:["Monaco","San Marino","Vatican City","Liechtenstein"] },
+    { q:"Which desert is the largest in the world?", a:"Antarctic Desert", opts:["Sahara","Gobi","Arabian","Antarctic Desert"] },
+    { q:"What is the highest mountain in the world?", a:"Mount Everest", opts:["K2","Kangchenjunga","Mount Everest","Makalu"] },
+    { q:"Which ocean is the largest?", a:"Pacific", opts:["Atlantic","Indian","Pacific","Arctic"] },
+    { q:"What country has the most population?", a:"India", opts:["China","USA","India","Indonesia"] },
+  ],
+  tech: [
+    { q:"What does 'HTTP' stand for?", a:"HyperText Transfer Protocol", opts:["HyperText Transfer Protocol","High-Tech Transfer Protocol","Hyperlink Text Transfer Process","HyperText Tracking Protocol"] },
+    { q:"Who co-founded Apple with Steve Jobs?", a:"Steve Wozniak", opts:["Bill Gates","Steve Wozniak","Jony Ive","Tim Cook"] },
+    { q:"What does 'CPU' stand for?", a:"Central Processing Unit", opts:["Central Power Unit","Computer Processing Unit","Central Processing Unit","Control Processing Unit"] },
+    { q:"Which company created the Python programming language?", a:"None — created by Guido", opts:["Google","Microsoft","None — created by Guido","Apple"] },
+    { q:"What year was the first iPhone released?", a:"2007", opts:["2004","2005","2007","2009"] },
+    { q:"What does 'HTML' stand for?", a:"HyperText Markup Language", opts:["HyperText Markup Language","High-Tech Modern Language","HyperText Modern Layout","Hyperlink Text Machine Language"] },
+    { q:"What is the name of the world's most visited website (as of recent years)?", a:"Google", opts:["YouTube","Facebook","Google","Wikipedia"] },
+    { q:"What programming language runs in the browser?", a:"JavaScript", opts:["Java","Python","JavaScript","PHP"] },
+    { q:"What does 'AI' stand for in computing?", a:"Artificial Intelligence", opts:["Automated Integration","Artificial Intelligence","Advanced Internet","Automated Interface"] },
+    { q:"What is the binary representation of the decimal 10?", a:"1010", opts:["1000","1010","1100","1001"] },
+  ]
+};
+
+// Build mixed
+QUESTIONS.mixed = [];
+Object.values(QUESTIONS).forEach(qs => QUESTIONS.mixed.push(...qs));
+
+/* ── Quiz State ── */
+let currentCat = 'mixed';
+let questions = [];
+let currentQ = 0;
+let correct = 0, wrong = 0;
+let timerInterval = null;
+let timeLeft = 15;
+let ll50Used = false, llSkipUsed = false;
+let answered = false;
+
+const modal = new bootstrap.Modal(document.getElementById('result-modal'));
+
+function startQuiz() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  ll50Used = false; llSkipUsed = false;
+  document.getElementById('ll-50').disabled = false;
+  document.getElementById('ll-50').style.opacity = '1';
+  document.getElementById('ll-skip').disabled = false;
+  document.getElementById('ll-skip').style.opacity = '1';
+  correct = 0; wrong = 0; currentQ = 0;
+  updateProgressScore();
+
+  // Pick 10 random unique questions
+  const pool = [...QUESTIONS[currentCat]];
+  shuffle(pool);
+  questions = pool.slice(0, 10);
+
+  loadQuestion();
+}
+
+function loadQuestion() {
+  if (currentQ >= questions.length) { endQuiz(); return; }
+  answered = false;
+  clearInterval(timerInterval);
+  timeLeft = 15;
+
+  const q = questions[currentQ];
+  document.getElementById('q-counter').textContent = `QUESTION ${currentQ+1} OF ${questions.length}`;
+  document.getElementById('quiz-progress-fill').style.width = `${(currentQ/questions.length)*100}%`;
+  document.getElementById('quiz-question').textContent = q.q;
+
+  // Shuffle options
+  const opts = shuffle([...q.opts]);
+  const letters = ['A','B','C','D'];
+  document.getElementById('quiz-options').innerHTML = opts.map((o,i) => `
+    <button class="quiz-option" data-answer="${o}">
+      <span class="option-letter">${letters[i]}</span>
+      ${o}
+    </button>
+  `).join('');
+
+  document.querySelectorAll('.quiz-option').forEach(btn => {
+    btn.addEventListener('click', () => selectAnswer(btn, q.a));
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  document.getElementById('q-timer').textContent = timeLeft;
+  document.getElementById('timer-bar').style.width = '100%';
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('q-timer').textContent = timeLeft;
+    document.getElementById('timer-bar').style.width = `${(timeLeft/15)*100}%`;
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) timeOut();
+    }
+  }, 1000);
+}
+
+function timeOut() {
+  answered = true;
+  playSound('wrong');
+  wrong++;
+  updateProgressScore();
+  // Highlight correct
+  document.querySelectorAll('.quiz-option').forEach(btn => {
+    if (btn.dataset.answer === questions[currentQ].a) btn.classList.add('correct');
+    btn.classList.add('disabled');
+  });
+  setTimeout(() => { currentQ++; loadQuestion(); }, 1200);
+}
+
+function selectAnswer(btn, correct_answer) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  document.querySelectorAll('.quiz-option').forEach(b => b.classList.add('disabled'));
+
+  if (btn.dataset.answer === correct_answer) {
+    btn.classList.add('correct');
+    playSound('correct');
+    correct++;
+  } else {
+    btn.classList.add('wrong');
+    playSound('wrong');
+    wrong++;
+    // Show correct
+    document.querySelectorAll('.quiz-option').forEach(b => {
+      if (b.dataset.answer === correct_answer) b.classList.add('correct');
+    });
+  }
+
+  updateProgressScore();
+  setTimeout(() => { currentQ++; loadQuestion(); }, 1200);
+}
+
+function updateProgressScore() {
+  document.getElementById('q-correct').textContent = correct;
+  document.getElementById('q-wrong').textContent = wrong;
+}
+
+function endQuiz() {
+  clearInterval(timerInterval);
+  document.getElementById('quiz-progress-fill').style.width = '100%';
+
+  const s = getScore('quiz');
+  if (correct > (s.best||0)) saveScore('quiz', { ...s, best: correct });
+  incrementScore('quiz', 'total');
+
+  if (correct >= 10) launchConfetti(60);
+  if (correct >= 8) playSound('win');
+
+  const grade = correct>=9?'🌟 PERFECT!':correct>=7?'🏆 EXCELLENT!':correct>=5?'👍 GOOD JOB!':'📚 KEEP LEARNING!';
+  document.getElementById('modal-emoji').textContent = correct>=8?'🏆':correct>=5?'👍':'📚';
+  document.getElementById('modal-title').textContent = `${correct}/10 CORRECT`;
+  document.getElementById('modal-subtitle').textContent = grade;
+  document.getElementById('modal-breakdown').innerHTML = `
+    <div style="font-family:var(--font-display);font-size:0.8rem;color:var(--text-secondary);line-height:2.2">
+      <div>✅ Correct: <span style="color:var(--neon-green)">${correct}</span></div>
+      <div>❌ Wrong: <span style="color:var(--neon-pink)">${wrong}</span></div>
+      <div>📈 Accuracy: <span style="color:var(--neon-cyan)">${Math.round((correct/questions.length)*100)}%</span></div>
+      <div>🏅 Best Score: <span style="color:var(--neon-yellow)">${Math.max(correct, s.best||0)}/10</span></div>
+    </div>`;
+
+  updateStartScreen();
+  modal.show();
+}
+
+function updateStartScreen() {
+  const s = getScore('quiz');
+  document.getElementById('start-best').textContent = (s.best||0) + '/10';
+  document.getElementById('start-total').textContent = s.total||0;
+}
+
+// Lifelines
+document.getElementById('ll-50').addEventListener('click', () => {
+  if (ll50Used || answered) return;
+  ll50Used = true;
+  document.getElementById('ll-50').disabled = true;
+  document.getElementById('ll-50').style.opacity = '0.4';
+  const q = questions[currentQ];
+  const allOpts = document.querySelectorAll('.quiz-option');
+  let removed = 0;
+  allOpts.forEach(btn => {
+    if (btn.dataset.answer !== q.a && removed < 2) {
+      btn.style.opacity = '0.2';
+      btn.disabled = true;
+      removed++;
+    }
+  });
+});
+
+document.getElementById('ll-skip').addEventListener('click', () => {
+  if (llSkipUsed || answered) return;
+  llSkipUsed = true;
+  document.getElementById('ll-skip').disabled = true;
+  document.getElementById('ll-skip').style.opacity = '0.4';
+  answered = true;
+  clearInterval(timerInterval);
+  currentQ++;
+  setTimeout(loadQuestion, 300);
+});
+
+// Category tabs
+document.querySelectorAll('#category-tabs .diff-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#category-tabs .diff-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentCat = tab.dataset.cat;
+  });
+});
+
+document.getElementById('btn-start-quiz').addEventListener('click', startQuiz);
+document.getElementById('modal-again').addEventListener('click', () => {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+  updateStartScreen();
+});
+
+function shuffle(a) {
+  for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+document.addEventListener('DOMContentLoaded', updateStartScreen);
+</script>
+</body>
+</html>

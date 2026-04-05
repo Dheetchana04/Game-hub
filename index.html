@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Hub — Neon Arcade</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <div class="loader-logo">GAME HUB</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  <div style="margin-top:16px;font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:3px;color:#5a5a8a;">INITIALIZING...</div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">🕹️ GAME HUB</a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#nav-menu"
+      style="color:var(--text-secondary);font-size:1.3rem;">☰</button>
+    <div class="collapse navbar-collapse" id="nav-menu">
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+        <li class="nav-item"><a class="nav-link" href="#games">GAMES</a></li>
+        <li class="nav-item"><a class="nav-link" href="#scores">SCORES</a></li>
+        <li class="nav-item">
+          <button id="sound-toggle" class="theme-toggle border-0">🔊</button>
+        </li>
+        <li class="nav-item">
+          <button id="theme-toggle" class="theme-toggle">☀️ <span>LIGHT</span></button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Score Bar -->
+<div class="score-bar" id="scores">
+  <div class="container d-flex flex-wrap justify-content-center">
+    <div class="score-item">
+      <span class="score-label">TTT WINS</span>
+      <span class="score-value" id="sb-ttt">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">RPS WINS</span>
+      <span class="score-value" id="sb-rps">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">MEMORY BEST</span>
+      <span class="score-value" id="sb-mem">—</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">GUESS BEST</span>
+      <span class="score-value" id="sb-num">—</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">MOLE BEST</span>
+      <span class="score-value" id="sb-mole">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">QUIZ BEST</span>
+      <span class="score-value" id="sb-quiz">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">TOTAL WINS</span>
+      <span class="score-value" id="total-wins">0</span>
+    </div>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="hero-content">
+    <h1 class="hero-title">GAME HUB</h1>
+    <p class="hero-subtitle">Six Mini-Games · One Arena</p>
+    <div class="stats-row">
+      <div class="stat-pill">
+        <div>
+          <div class="stat-number" id="total-games-played">0</div>
+          <div class="stat-text">Games Played</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <div>
+          <div class="stat-number" id="total-wins-hero">0</div>
+          <div class="stat-text">Total Wins</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <div>
+          <div class="stat-number" id="achievements-count">0</div>
+          <div class="stat-text">Achievements</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Games Grid -->
+<section class="games-section" id="games">
+  <div class="container">
+    <div class="section-title">— Choose Your Game —</div>
+    <div class="row g-4">
+
+      <!-- Tic Tac Toe -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <a href="tictactoe.html" class="game-card game-card-1" style="text-decoration:none">
+          <div class="game-card-body">
+            <div class="game-icon-wrap">🎯</div>
+            <div class="game-title">TIC TAC TOE</div>
+            <div class="game-desc">Classic 3×3 strategy. Play against a smart AI or challenge a friend. Mark your territory!</div>
+            <div class="game-meta">
+              <span class="game-badge badge-cyan">STRATEGY</span>
+              <div>
+                <div class="game-score-display">WINS: <span id="card-ttt">0</span></div>
+              </div>
+            </div>
+            <div style="margin-top:16px"><span class="play-btn">▶ PLAY NOW</span></div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Rock Paper Scissors -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <a href="rps.html" class="game-card game-card-2" style="text-decoration:none">
+          <div class="game-card-body">
+            <div class="game-icon-wrap">✂️</div>
+            <div class="game-title">ROCK PAPER SCISSORS</div>
+            <div class="game-desc">The timeless hand game. Beat the computer in this best-of-series showdown!</div>
+            <div class="game-meta">
+              <span class="game-badge badge-pink">VERSUS</span>
+              <div>
+                <div class="game-score-display">WINS: <span id="card-rps">0</span></div>
+              </div>
+            </div>
+            <div style="margin-top:16px"><span class="play-btn">▶ PLAY NOW</span></div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Memory Game -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <a href="memory.html" class="game-card game-card-3" style="text-decoration:none">
+          <div class="game-card-body">
+            <div class="game-icon-wrap">🃏</div>
+            <div class="game-title">MEMORY MATCH</div>
+            <div class="game-desc">Flip cards, find matching pairs. Test your memory with increasing difficulty!</div>
+            <div class="game-meta">
+              <span class="game-badge badge-purple">MEMORY</span>
+              <div>
+                <div class="game-score-display">BEST: <span id="card-mem">—</span>s</div>
+              </div>
+            </div>
+            <div style="margin-top:16px"><span class="play-btn">▶ PLAY NOW</span></div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Number Guess -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <a href="numguess.html" class="game-card game-card-4" style="text-decoration:none">
+          <div class="game-card-body">
+            <div class="game-icon-wrap">🔢</div>
+            <div class="game-title">NUMBER GUESSER</div>
+            <div class="game-desc">A secret number is hidden. Use hot/cold hints to find it with fewest guesses!</div>
+            <div class="game-meta">
+              <span class="game-badge badge-green">PUZZLE</span>
+              <div>
+                <div class="game-score-display">BEST: <span id="card-num">—</span> tries</div>
+              </div>
+            </div>
+            <div style="margin-top:16px"><span class="play-btn">▶ PLAY NOW</span></div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Whack a Mole -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <a href="mole.html" class="game-card game-card-5" style="text-decoration:none">
+          <div class="game-card-body">
+            <div class="game-icon-wrap">🔨</div>
+            <div class="game-title">WHACK-A-MOLE</div>
+            <div class="game-desc">Moles are popping up everywhere! Click them fast before time runs out. Go!</div>
+            <div class="game-meta">
+              <span class="game-badge badge-orange">ACTION</span>
+              <div>
+                <div class="game-score-display">BEST: <span id="card-mole">0</span></div>
+              </div>
+            </div>
+            <div style="margin-top:16px"><span class="play-btn">▶ PLAY NOW</span></div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Quiz Game -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <a href="quiz.html" class="game-card game-card-6" style="text-decoration:none">
+          <div class="game-card-body">
+            <div class="game-icon-wrap">🧠</div>
+            <div class="game-title">TRIVIA QUIZ</div>
+            <div class="game-desc">Test your knowledge across science, history, geography, and pop culture!</div>
+            <div class="game-meta">
+              <span class="game-badge badge-yellow">TRIVIA</span>
+              <div>
+                <div class="game-score-display">BEST: <span id="card-quiz">0</span>/10</div>
+              </div>
+            </div>
+            <div style="margin-top:16px"><span class="play-btn">▶ PLAY NOW</span></div>
+          </div>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Achievements Section -->
+    <div class="mt-5">
+      <div class="section-title">— Achievements —</div>
+      <div id="achievements-grid" class="row g-3"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div>🕹️ GAME HUB · Built with HTML5, CSS3, Bootstrap 5 & Vanilla JS</div>
+    <div style="margin-top:8px;font-size:0.65rem;opacity:0.5">ALL SCORES SAVED LOCALLY · NO SERVER REQUIRED</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/utils.js"></script>
+<script>
+  // Update all score displays on home page
+  function refreshHomeScores() {
+    const ttt = getScore('tictactoe');
+    const rps = getScore('rps');
+    const mem = getScore('memory');
+    const num = getScore('numguess');
+    const mole = getScore('mole');
+    const quiz = getScore('quiz');
+
+    document.getElementById('sb-ttt').textContent = ttt.wins || 0;
+    document.getElementById('sb-rps').textContent = rps.wins || 0;
+    document.getElementById('sb-mem').textContent = mem.best || '—';
+    document.getElementById('sb-num').textContent = num.best || '—';
+    document.getElementById('sb-mole').textContent = mole.best || 0;
+    document.getElementById('sb-quiz').textContent = quiz.best || 0;
+
+    document.getElementById('card-ttt').textContent = ttt.wins || 0;
+    document.getElementById('card-rps').textContent = rps.wins || 0;
+    document.getElementById('card-mem').textContent = mem.best || '—';
+    document.getElementById('card-num').textContent = num.best || '—';
+    document.getElementById('card-mole').textContent = mole.best || 0;
+    document.getElementById('card-quiz').textContent = (quiz.best || 0) + '/10';
+
+    const totalWins = (ttt.wins||0)+(rps.wins||0)+(mem.wins||0)+(num.wins||0)+(mole.wins||0)+(quiz.wins||0);
+    const totalPlayed = (ttt.total||0)+(rps.total||0)+(mem.total||0)+(num.total||0)+(mole.total||0)+(quiz.total||0);
+    document.getElementById('total-wins').textContent = totalWins;
+    document.getElementById('total-wins-hero').textContent = totalWins;
+    document.getElementById('total-games-played').textContent = totalPlayed;
+
+    const unlocked = JSON.parse(localStorage.getItem('gh_achievements') || '[]');
+    document.getElementById('achievements-count').textContent = unlocked.length;
+    renderAchievements(unlocked);
+  }
+
+  const ALL_ACHIEVEMENTS = [
+    { key: 'ttt_win1', label: '🎮 First Victory', desc: 'Win your first Tic Tac Toe' },
+    { key: 'ttt_win5', label: '🏆 TTT Champion', desc: 'Win 5 Tic Tac Toe games' },
+    { key: 'rps_win1', label: '✊ Sharp Shooter', desc: 'Win your first RPS round' },
+    { key: 'rps_win10', label: '👑 RPS King', desc: 'Win 10 RPS rounds' },
+    { key: 'mem_win1', label: '🧠 Memory Awakened', desc: 'Complete the memory game' },
+    { key: 'mem_fast', label: '⚡ Speed Mind', desc: 'Complete memory in under 30s' },
+    { key: 'num_win1', label: '🔢 First Guess', desc: 'Guess your first number' },
+    { key: 'num_easy', label: '🎯 Sharp Mind', desc: 'Guess in 3 or fewer tries' },
+    { key: 'mole_50', label: '🔨 Mole Buster', desc: 'Score 50+ in Whack-a-Mole' },
+    { key: 'mole_100', label: '💥 Mole Destroyer', desc: 'Score 100+ in Whack-a-Mole' },
+    { key: 'quiz_first', label: '📚 Scholar', desc: 'Complete your first quiz' },
+    { key: 'quiz_perfect', label: '🌟 Perfectionist', desc: 'Get a perfect quiz score' },
+  ];
+
+  function renderAchievements(unlocked) {
+    const grid = document.getElementById('achievements-grid');
+    grid.innerHTML = ALL_ACHIEVEMENTS.map(a => {
+      const done = unlocked.includes(a.key);
+      return `<div class="col-6 col-md-4 col-lg-3">
+        <div style="background:var(--bg-card);border:1px solid var(--glass-border);border-radius:12px;padding:14px;opacity:${done?1:0.35};transition:opacity 0.3s;${done?'border-color:rgba(250,204,21,0.4);':''}" >
+          <div style="font-size:1.5rem;margin-bottom:6px">${a.label.split(' ')[0]}</div>
+          <div style="font-family:var(--font-display);font-size:0.65rem;letter-spacing:1px;color:${done?'var(--neon-yellow)':'var(--text-muted)'};margin-bottom:4px">${a.label.split(' ').slice(1).join(' ')}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted)">${a.desc}</div>
+          ${done?'<div style="font-family:var(--font-display);font-size:0.6rem;color:var(--neon-green);margin-top:6px;letter-spacing:1px">✓ UNLOCKED</div>':''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', refreshHomeScores);
+</script>
+</body>
+</html>

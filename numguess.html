@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Number Guesser — Game Hub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="loading-screen">
+  <div class="loader-logo">GUESS</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+</div>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">🕹️ GAME HUB</a>
+    <div class="ms-auto d-flex gap-2">
+      <button id="sound-toggle" class="theme-toggle border-0">🔊</button>
+      <button id="theme-toggle" class="theme-toggle">☀️ <span>LIGHT</span></button>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="game-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <a href="index.html" class="back-btn mb-2 d-inline-flex">← BACK TO HUB</a>
+      <h1 class="game-page-title">NUMBER <span>GUESSER</span></h1>
+    </div>
+    <div class="difficulty-tabs">
+      <button class="diff-tab active" data-max="50" data-attempts="10">EASY</button>
+      <button class="diff-tab" data-max="100" data-attempts="8">MEDIUM</button>
+      <button class="diff-tab" data-max="200" data-attempts="7">HARD</button>
+      <button class="diff-tab" data-max="500" data-attempts="5">EXPERT</button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4 col-md-5">
+      <div class="score-panel">
+        <div class="score-title">ALL-TIME STATS</div>
+        <div class="score-nums">
+          <div class="score-num-item">
+            <div class="score-num-value win-color" id="stat-wins">0</div>
+            <div class="score-num-label">WINS</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value lose-color" id="stat-losses">0</div>
+            <div class="score-num-label">LOSSES</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value cyan-color" id="stat-best">—</div>
+            <div class="score-num-label">BEST</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="instructions-box">
+        <strong>HOW TO PLAY</strong>
+        I'm thinking of a number. Enter your guess and I'll tell you if it's too high or too low.<br/><br/>
+        🟢 <b>Warm</b> = within 10%<br/>
+        🟡 <b>Hot</b> = within 5%<br/>
+        🔴 <b>On Fire</b> = within 2%<br/><br/>
+        Use all your attempts wisely!
+      </div>
+
+      <div class="score-panel">
+        <div class="score-title">CURRENT GAME</div>
+        <div style="font-family:var(--font-display);font-size:0.75rem;letter-spacing:1px;color:var(--text-secondary);line-height:2">
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--text-muted)">RANGE:</span>
+            <span>1 — <span id="info-max">50</span></span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--text-muted)">ATTEMPTS LEFT:</span>
+            <span id="info-attempts" style="color:var(--neon-orange)">10</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--text-muted)">GUESSES MADE:</span>
+            <span id="info-count">0</span>
+          </div>
+        </div>
+        <!-- Attempts bar -->
+        <div class="attempts-bar mt-3">
+          <div class="attempts-bar-fill" id="attempts-bar-fill" style="width:100%"></div>
+        </div>
+      </div>
+
+      <button class="btn-neon btn-neon-green w-100" id="btn-reset">↺ NEW NUMBER</button>
+    </div>
+
+    <div class="col-lg-8 col-md-7">
+      <!-- Range display -->
+      <div class="guess-range-display">
+        <div class="range-pill">MIN: <span class="range-num" id="range-low">1</span></div>
+        <div style="font-family:var(--font-display);font-size:0.8rem;color:var(--text-muted)">← SEARCH ZONE →</div>
+        <div class="range-pill">MAX: <span class="range-num" id="range-high">50</span></div>
+      </div>
+
+      <!-- Progress bar visual -->
+      <div style="height:8px;background:rgba(99,102,241,0.1);border-radius:8px;margin:8px 0 20px;position:relative;overflow:visible">
+        <div id="range-indicator" style="position:absolute;height:100%;border-radius:8px;background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan));transition:all 0.4s ease;left:0;width:100%"></div>
+        <div id="guess-dot" style="position:absolute;top:-4px;width:16px;height:16px;background:var(--neon-yellow);border-radius:50%;box-shadow:0 0 12px var(--neon-yellow);transform:translateX(-50%);left:50%;display:none;transition:left 0.4s ease"></div>
+      </div>
+
+      <!-- Input area -->
+      <div class="guess-input-wrap">
+        <input type="number" class="guess-input" id="guess-input" placeholder="?" min="1"/>
+        <button class="btn-neon btn-neon-green" id="btn-guess">GUESS!</button>
+      </div>
+
+      <!-- Hint display -->
+      <div id="hint-display" style="text-align:center;font-family:var(--font-display);font-size:1rem;letter-spacing:2px;min-height:32px;margin-bottom:16px"></div>
+
+      <!-- History -->
+      <div class="guess-history" id="guess-history"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Result Modal -->
+<div class="modal fade" id="result-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body py-4">
+        <span class="result-emoji" id="modal-emoji">🎯</span>
+        <div class="result-title" id="modal-title">CORRECT!</div>
+        <div class="result-subtitle" id="modal-subtitle"></div>
+      </div>
+      <div class="modal-footer justify-content-center border-0 pb-4">
+        <button class="btn-neon btn-neon-green me-2" id="modal-again" data-bs-dismiss="modal">▶ PLAY AGAIN</button>
+        <button class="btn-neon btn-neon-purple" onclick="window.location.href='index.html'">← HUB</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/utils.js"></script>
+<script>
+/* ── Number Guessing Game ── */
+let secret, maxNum, maxAttempts, attemptsMade, rangeLow, rangeHigh;
+let gameActive = false;
+
+const modal = new bootstrap.Modal(document.getElementById('result-modal'));
+
+function initGame() {
+  secret = Math.floor(Math.random() * maxNum) + 1;
+  attemptsMade = 0;
+  rangeLow = 1;
+  rangeHigh = maxNum;
+  gameActive = true;
+
+  document.getElementById('info-max').textContent = maxNum;
+  document.getElementById('info-attempts').textContent = maxAttempts;
+  document.getElementById('info-count').textContent = 0;
+  document.getElementById('range-low').textContent = 1;
+  document.getElementById('range-high').textContent = maxNum;
+  document.getElementById('guess-input').max = maxNum;
+  document.getElementById('guess-input').value = '';
+  document.getElementById('guess-history').innerHTML = '';
+  document.getElementById('hint-display').textContent = '';
+  document.getElementById('range-indicator').style.left = '0';
+  document.getElementById('range-indicator').style.width = '100%';
+  document.getElementById('guess-dot').style.display = 'none';
+  document.getElementById('attempts-bar-fill').style.width = '100%';
+  document.getElementById('guess-input').focus();
+  refreshStats();
+}
+
+function makeGuess() {
+  if (!gameActive) return;
+  const input = document.getElementById('guess-input');
+  const guess = parseInt(input.value);
+  if (isNaN(guess) || guess < 1 || guess > maxNum) {
+    input.style.borderColor = 'var(--neon-pink)';
+    setTimeout(() => input.style.borderColor = '', 600);
+    return;
+  }
+
+  attemptsMade++;
+  document.getElementById('info-count').textContent = attemptsMade;
+  const attLeft = maxAttempts - attemptsMade;
+  document.getElementById('info-attempts').textContent = attLeft;
+  document.getElementById('attempts-bar-fill').style.width = `${(attLeft/maxAttempts)*100}%`;
+
+  // Update range
+  if (guess < secret) rangeLow = Math.max(rangeLow, guess + 1);
+  else if (guess > secret) rangeHigh = Math.min(rangeHigh, guess - 1);
+
+  document.getElementById('range-low').textContent = rangeLow;
+  document.getElementById('range-high').textContent = rangeHigh;
+
+  // Update range indicator
+  const pctLow = ((rangeLow-1)/maxNum)*100;
+  const pctHigh = ((rangeHigh)/maxNum)*100;
+  document.getElementById('range-indicator').style.left = pctLow+'%';
+  document.getElementById('range-indicator').style.width = (pctHigh-pctLow)+'%';
+
+  // Guess dot position
+  const dotPct = ((guess-1)/maxNum)*100;
+  const dot = document.getElementById('guess-dot');
+  dot.style.display = 'block';
+  dot.style.left = dotPct+'%';
+
+  const diff = Math.abs(guess - secret);
+  const pct = diff / maxNum;
+  let hint, hintColor;
+
+  if (guess === secret) {
+    gameActive = false;
+    playSound('win');
+    launchConfetti(50);
+    const s = incrementScore('numguess', 'wins');
+    const prev = getScore('numguess');
+    if (!prev.best || attemptsMade < prev.best) {
+      saveScore('numguess', { ...prev, best: attemptsMade });
+    }
+    refreshStats();
+    addHistory(guess, '🎯 EXACT!', 'var(--neon-green)');
+    setTimeout(() => {
+      document.getElementById('modal-emoji').textContent = attemptsMade===1?'🤯':'🎯';
+      document.getElementById('modal-title').textContent = attemptsMade===1?'FIRST TRY!':'CORRECT!';
+      document.getElementById('modal-subtitle').textContent = `The number was ${secret}. You got it in ${attemptsMade} attempt${attemptsMade>1?'s':''}!`;
+      modal.show();
+    }, 400);
+    return;
+  }
+
+  if (pct <= 0.02) { hint = '🔥 ON FIRE!'; hintColor = 'var(--neon-orange)'; playSound('correct'); }
+  else if (pct <= 0.05) { hint = '♨️ HOT!'; hintColor = '#f97316'; playSound('correct'); }
+  else if (pct <= 0.10) { hint = '🌡️ WARM'; hintColor = 'var(--neon-yellow)'; playSound('click'); }
+  else if (guess < secret) { hint = '⬆️ TOO LOW'; hintColor = 'var(--neon-cyan)'; playSound('click'); }
+  else { hint = '⬇️ TOO HIGH'; hintColor = 'var(--neon-pink)'; playSound('click'); }
+
+  document.getElementById('hint-display').textContent = hint;
+  document.getElementById('hint-display').style.color = hintColor;
+
+  const direction = guess < secret ? '↑ GO HIGHER' : '↓ GO LOWER';
+  addHistory(guess, `${hint} · ${direction}`, hintColor);
+
+  input.value = '';
+
+  if (attemptsMade >= maxAttempts) {
+    gameActive = false;
+    playSound('lose');
+    incrementScore('numguess', 'losses');
+    refreshStats();
+    setTimeout(() => {
+      document.getElementById('modal-emoji').textContent = '😔';
+      document.getElementById('modal-title').textContent = 'OUT OF GUESSES!';
+      document.getElementById('modal-subtitle').textContent = `The number was ${secret}. Better luck next time!`;
+      modal.show();
+    }, 400);
+  }
+}
+
+function addHistory(guess, hint, color) {
+  const h = document.getElementById('guess-history');
+  const item = document.createElement('div');
+  item.className = 'guess-entry';
+  item.innerHTML = `<span class="guess-number">#${attemptsMade} → ${guess}</span><span style="color:${color};font-size:0.75rem;letter-spacing:1px">${hint}</span>`;
+  h.insertBefore(item, h.firstChild);
+}
+
+function refreshStats() {
+  const s = getScore('numguess');
+  document.getElementById('stat-wins').textContent = s.wins||0;
+  document.getElementById('stat-losses').textContent = s.losses||0;
+  document.getElementById('stat-best').textContent = s.best || '—';
+}
+
+// Difficulty tabs
+let currentDiff = { max:50, attempts:10 };
+document.querySelectorAll('.diff-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.diff-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    maxNum = parseInt(tab.dataset.max);
+    maxAttempts = parseInt(tab.dataset.attempts);
+    currentDiff = { max: maxNum, attempts: maxAttempts };
+    initGame();
+  });
+});
+
+document.getElementById('btn-reset').addEventListener('click', initGame);
+document.getElementById('modal-again').addEventListener('click', initGame);
+
+document.getElementById('btn-guess').addEventListener('click', makeGuess);
+document.getElementById('guess-input').addEventListener('keydown', e => { if (e.key==='Enter') makeGuess(); });
+
+// Set defaults
+maxNum = 50; maxAttempts = 10;
+document.addEventListener('DOMContentLoaded', initGame);
+</script>
+</body>
+</html>

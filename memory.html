@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Match — Game Hub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="loading-screen">
+  <div class="loader-logo">MEMORY</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+</div>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">🕹️ GAME HUB</a>
+    <div class="ms-auto d-flex gap-2">
+      <button id="sound-toggle" class="theme-toggle border-0">🔊</button>
+      <button id="theme-toggle" class="theme-toggle">☀️ <span>LIGHT</span></button>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="game-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <a href="index.html" class="back-btn mb-2 d-inline-flex">← BACK TO HUB</a>
+      <h1 class="game-page-title">MEMORY <span>MATCH</span></h1>
+    </div>
+    <div class="difficulty-tabs">
+      <button class="diff-tab active" data-size="4x4">4×4</button>
+      <button class="diff-tab" data-size="4x5">4×5</button>
+      <button class="diff-tab" data-size="6x4">6×4</button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4 col-md-5">
+      <div class="score-panel">
+        <div class="score-title">CURRENT GAME</div>
+        <div class="score-nums">
+          <div class="score-num-item">
+            <div class="score-num-value cyan-color" id="timer-display">00:00</div>
+            <div class="score-num-label">TIME</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value win-color" id="matches-display">0</div>
+            <div class="score-num-label">MATCHES</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value" id="moves-display">0</div>
+            <div class="score-num-label">MOVES</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-panel">
+        <div class="score-title">BEST TIMES</div>
+        <div style="font-family:var(--font-display);font-size:0.75rem;letter-spacing:1px;color:var(--text-secondary)">
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color:var(--text-muted)">4×4:</span>
+            <span id="best-4x4" class="win-color">—</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color:var(--text-muted)">4×5:</span>
+            <span id="best-4x5" class="win-color">—</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--text-muted)">6×4:</span>
+            <span id="best-6x4" class="win-color">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="instructions-box">
+        <strong>HOW TO PLAY</strong>
+        Click any card to flip it, then find its matching pair. Remember the positions!<br/><br/>
+        Complete all pairs as fast as possible for the best time. Two wrong flips count as one move.
+      </div>
+      <button class="btn-neon btn-neon-purple w-100 mb-3" id="btn-reset">↺ NEW GAME</button>
+      <button class="btn-neon btn-neon-cyan w-100" id="btn-peek">👁 PEEK (3s)</button>
+    </div>
+
+    <div class="col-lg-8 col-md-7 d-flex flex-column align-items-center">
+      <div class="memory-board" id="memory-board"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Result Modal -->
+<div class="modal fade" id="result-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body py-4">
+        <span class="result-emoji">🎉</span>
+        <div class="result-title">BOARD CLEARED!</div>
+        <div class="result-subtitle" id="modal-subtitle">Amazing memory!</div>
+        <div style="margin-top:16px;" id="modal-stats"></div>
+      </div>
+      <div class="modal-footer justify-content-center border-0 pb-4">
+        <button class="btn-neon btn-neon-purple me-2" id="modal-play-again" data-bs-dismiss="modal">▶ PLAY AGAIN</button>
+        <button class="btn-neon btn-neon-cyan" onclick="window.location.href='index.html'">← HUB</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/utils.js"></script>
+<script>
+/* ── Memory Match ── */
+const CARD_SETS = {
+  animals: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮'],
+};
+
+let gridSize = { cols:4, rows:4 };
+let cards = [];
+let flipped = [];
+let matched = 0;
+let moves = 0;
+let totalPairs = 0;
+let timerInterval = null;
+let seconds = 0;
+let canFlip = true;
+let gameStarted = false;
+let currentSizeKey = '4x4';
+
+const board = document.getElementById('memory-board');
+const modal = new bootstrap.Modal(document.getElementById('result-modal'));
+
+function initMemory() {
+  clearInterval(timerInterval);
+  seconds = 0; moves = 0; matched = 0; gameStarted = false;
+  flipped = []; canFlip = true;
+  updateTimerDisplay(0);
+  document.getElementById('matches-display').textContent = 0;
+  document.getElementById('moves-display').textContent = 0;
+
+  const { cols, rows } = gridSize;
+  totalPairs = (cols * rows) / 2;
+  const allEmojis = CARD_SETS.animals;
+  const chosen = allEmojis.slice(0, totalPairs);
+  cards = shuffle([...chosen, ...chosen]);
+
+  // Set grid columns
+  board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  const maxW = cols === 6 ? 480 : 420;
+  board.style.maxWidth = maxW + 'px';
+
+  board.innerHTML = cards.map((emoji, i) => `
+    <div class="memory-card" data-index="${i}" data-emoji="${emoji}">
+      <div class="memory-card-inner">
+        <div class="memory-card-front">⬡</div>
+        <div class="memory-card-back">${emoji}</div>
+      </div>
+    </div>
+  `).join('');
+
+  board.querySelectorAll('.memory-card').forEach(card => {
+    card.addEventListener('click', () => handleCardClick(card));
+  });
+
+  refreshBestTimes();
+}
+
+function handleCardClick(card) {
+  if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+  if (!gameStarted) startTimer();
+
+  playSound('flip');
+  card.classList.add('flipped');
+  flipped.push(card);
+
+  if (flipped.length === 2) {
+    canFlip = false;
+    moves++;
+    document.getElementById('moves-display').textContent = moves;
+    checkMatch();
+  }
+}
+
+function checkMatch() {
+  const [a, b] = flipped;
+  if (a.dataset.emoji === b.dataset.emoji) {
+    a.classList.add('matched');
+    b.classList.add('matched');
+    playSound('match');
+    matched++;
+    document.getElementById('matches-display').textContent = matched;
+    flipped = [];
+    canFlip = true;
+    if (matched === totalPairs) onWin();
+  } else {
+    setTimeout(() => {
+      a.classList.remove('flipped');
+      b.classList.remove('flipped');
+      flipped = [];
+      canFlip = true;
+    }, 900);
+  }
+}
+
+function onWin() {
+  clearInterval(timerInterval);
+  playSound('win');
+  launchConfetti(50);
+  incrementScore('memory', 'wins');
+
+  // Save best time
+  const bestKey = `gh_mem_best_${currentSizeKey}`;
+  const prev = parseInt(localStorage.getItem(bestKey)) || Infinity;
+  if (seconds < prev) {
+    localStorage.setItem(bestKey, seconds);
+    const s = getScore('memory');
+    if (currentSizeKey === '4x4') {
+      s.best = seconds;
+      localStorage.setItem('gh_score_mem', JSON.stringify(s));
+    }
+    checkAchievements('memory', s);
+  }
+
+  const isNew = seconds < (parseInt(localStorage.getItem(bestKey+'_old'))||Infinity);
+  const m = Math.floor(seconds/60).toString().padStart(2,'0');
+  const sec = (seconds%60).toString().padStart(2,'0');
+  document.getElementById('modal-subtitle').textContent = isNew ? '🏆 New Best Time!' : 'Board cleared!';
+  document.getElementById('modal-stats').innerHTML = `
+    <div style="font-family:var(--font-display);font-size:0.8rem;color:var(--text-secondary);line-height:2">
+      <div>⏱ Time: <span style="color:var(--neon-cyan)">${m}:${sec}</span></div>
+      <div>🎯 Moves: <span style="color:var(--neon-purple)">${moves}</span></div>
+      <div>⚡ Accuracy: <span style="color:var(--neon-green)">${Math.round((totalPairs/moves)*100)}%</span></div>
+    </div>`;
+  setTimeout(() => modal.show(), 400);
+  refreshBestTimes();
+}
+
+function startTimer() {
+  gameStarted = true;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    seconds++;
+    updateTimerDisplay(seconds);
+  }, 1000);
+}
+
+function updateTimerDisplay(s) {
+  const m = Math.floor(s/60).toString().padStart(2,'0');
+  const sec = (s%60).toString().padStart(2,'0');
+  document.getElementById('timer-display').textContent = `${m}:${sec}`;
+}
+
+function refreshBestTimes() {
+  ['4x4','4x5','6x4'].forEach(key => {
+    const best = localStorage.getItem(`gh_mem_best_${key}`);
+    const el = document.getElementById(`best-${key}`);
+    if (el && best) {
+      const m = Math.floor(best/60).toString().padStart(2,'0');
+      const s = (best%60).toString().padStart(2,'0');
+      el.textContent = `${m}:${s}`;
+    }
+  });
+}
+
+// Peek feature
+let peekUsed = false;
+document.getElementById('btn-peek').addEventListener('click', () => {
+  if (peekUsed) return;
+  peekUsed = true;
+  document.getElementById('btn-peek').textContent = '👁 PEEK (USED)';
+  document.getElementById('btn-peek').style.opacity = '0.4';
+  canFlip = false;
+  board.querySelectorAll('.memory-card:not(.matched)').forEach(c => c.classList.add('flipped'));
+  setTimeout(() => {
+    board.querySelectorAll('.memory-card:not(.matched)').forEach(c => c.classList.remove('flipped'));
+    canFlip = true;
+  }, 3000);
+});
+
+// Difficulty tabs
+document.querySelectorAll('.diff-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.diff-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentSizeKey = tab.dataset.size;
+    if (currentSizeKey === '4x4') gridSize = {cols:4, rows:4};
+    else if (currentSizeKey === '4x5') gridSize = {cols:4, rows:5};
+    else gridSize = {cols:6, rows:4};
+    peekUsed = false;
+    document.getElementById('btn-peek').textContent = '👁 PEEK (3s)';
+    document.getElementById('btn-peek').style.opacity = '1';
+    initMemory();
+  });
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => { peekUsed=false; document.getElementById('btn-peek').textContent='👁 PEEK (3s)'; document.getElementById('btn-peek').style.opacity='1'; initMemory(); });
+document.getElementById('modal-play-again').addEventListener('click', () => { peekUsed=false; document.getElementById('btn-peek').textContent='👁 PEEK (3s)'; document.getElementById('btn-peek').style.opacity='1'; initMemory(); });
+
+function shuffle(a) {
+  for (let i=a.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+document.addEventListener('DOMContentLoaded', initMemory);
+</script>
+</body>
+</html>

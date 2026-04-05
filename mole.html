@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Whack-a-Mole — Game Hub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔨</text></svg>"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="loading-screen">
+  <div class="loader-logo">WHACK!</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+</div>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">🕹️ GAME HUB</a>
+    <div class="ms-auto d-flex gap-2">
+      <button id="sound-toggle" class="theme-toggle border-0">🔊</button>
+      <button id="theme-toggle" class="theme-toggle">☀️ <span>LIGHT</span></button>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="game-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <a href="index.html" class="back-btn mb-2 d-inline-flex">← BACK TO HUB</a>
+      <h1 class="game-page-title">WHACK-A-<span>MOLE</span></h1>
+    </div>
+    <div class="difficulty-tabs">
+      <button class="diff-tab active" data-speed="1000" data-duration="30">EASY</button>
+      <button class="diff-tab" data-speed="700" data-duration="30">MEDIUM</button>
+      <button class="diff-tab" data-speed="450" data-duration="25">HARD</button>
+      <button class="diff-tab" data-speed="280" data-duration="20">CHAOS</button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4 col-md-5">
+      <div class="score-panel">
+        <div class="score-title">CURRENT GAME</div>
+        <div class="score-nums">
+          <div class="score-num-item">
+            <div class="score-num-value win-color" style="font-size:2.5rem" id="current-score">0</div>
+            <div class="score-num-label">SCORE</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value lose-color" id="misses">0</div>
+            <div class="score-num-label">MISSED</div>
+          </div>
+          <div class="score-num-item">
+            <div class="score-num-value cyan-color" id="combo">0</div>
+            <div class="score-num-label">COMBO</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-panel">
+        <div class="score-title">LEADERBOARD</div>
+        <div style="font-family:var(--font-display);font-size:0.75rem;letter-spacing:1px;color:var(--text-secondary)">
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color:var(--text-muted)">EASY:</span>
+            <span id="lb-easy" class="win-color">0</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color:var(--text-muted)">MEDIUM:</span>
+            <span id="lb-medium" class="win-color">0</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color:var(--text-muted)">HARD:</span>
+            <span id="lb-hard" class="win-color">0</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--text-muted)">CHAOS:</span>
+            <span id="lb-chaos" class="win-color">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="instructions-box">
+        <strong>HOW TO PLAY</strong>
+        Moles pop up from their holes — click them before they hide! Miss too many and you lose points.<br/><br/>
+        🔥 <b>Combo</b>: Consecutive hits boost your score!<br/>
+        Watch the timer — game ends when it hits zero!
+      </div>
+
+      <button class="btn-neon btn-neon-orange w-100" id="btn-start" style="font-size:1rem;padding:14px">▶ START GAME</button>
+    </div>
+
+    <div class="col-lg-8 col-md-7 d-flex flex-column align-items-center">
+      <!-- Timer -->
+      <div class="wam-timer safe" id="wam-timer">30</div>
+      <div style="font-family:var(--font-display);font-size:0.7rem;letter-spacing:2px;color:var(--text-muted);margin-bottom:16px">SECONDS REMAINING</div>
+
+      <!-- Combo display -->
+      <div id="combo-display" style="font-family:var(--font-display);font-size:1rem;letter-spacing:2px;color:var(--neon-orange);min-height:28px;margin-bottom:12px"></div>
+
+      <!-- Grid -->
+      <div class="mole-grid" id="mole-grid">
+        <div class="mole-hole" data-hole="0"><span class="mole-emoji">🐹</span></div>
+        <div class="mole-hole" data-hole="1"><span class="mole-emoji">🐹</span></div>
+        <div class="mole-hole" data-hole="2"><span class="mole-emoji">🐹</span></div>
+        <div class="mole-hole" data-hole="3"><span class="mole-emoji">🐹</span></div>
+        <div class="mole-hole" data-hole="4"><span class="mole-emoji">🐹</span></div>
+        <div class="mole-hole" data-hole="5"><span class="mole-emoji">🐹</span></div>
+        <div class="mole-hole" data-hole="6"><span class="mole-emoji">🐹</span></div>
+        <div class="mole-hole" data-hole="7"><span class="mole-emoji">🐹</span></div>
+        <div class="mole-hole" data-hole="8"><span class="mole-emoji">🐹</span></div>
+      </div>
+
+      <!-- Start overlay -->
+      <div id="game-overlay" style="position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10">
+        <div id="countdown-txt" style="font-family:var(--font-display);font-size:4rem;font-weight:900;color:var(--neon-orange);text-shadow:0 0 40px var(--neon-orange)"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Result Modal -->
+<div class="modal fade" id="result-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-2">
+      <div class="modal-body py-4">
+        <span class="result-emoji" id="modal-emoji">🔨</span>
+        <div class="result-title" id="modal-title">TIME'S UP!</div>
+        <div class="result-subtitle" id="modal-subtitle"></div>
+        <div style="margin-top:16px" id="modal-stats"></div>
+      </div>
+      <div class="modal-footer justify-content-center border-0 pb-4">
+        <button class="btn-neon btn-neon-orange me-2" id="modal-again" data-bs-dismiss="modal">▶ PLAY AGAIN</button>
+        <button class="btn-neon btn-neon-purple" onclick="window.location.href='index.html'">← HUB</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/utils.js"></script>
+<script>
+/* ── Whack-a-Mole ── */
+let score = 0, misses = 0, combo = 0, maxCombo = 0;
+let gameRunning = false;
+let timeLeft = 30;
+let moleSpeed = 1000;
+let gameDuration = 30;
+let timerInterval = null;
+let moleTimeout = null;
+let activeMole = -1;
+let activeMoleTimeout = null;
+let currentDiff = 'easy';
+
+const modal = new bootstrap.Modal(document.getElementById('result-modal'));
+const holes = document.querySelectorAll('.mole-hole');
+
+function initGame() {
+  score = 0; misses = 0; combo = 0; maxCombo = 0;
+  timeLeft = gameDuration;
+  updateDisplay();
+  document.getElementById('wam-timer').textContent = gameDuration;
+  document.getElementById('wam-timer').className = 'wam-timer safe';
+  deactivateAllMoles();
+  document.getElementById('combo-display').textContent = '';
+  document.getElementById('btn-start').textContent = '▶ START GAME';
+  gameRunning = false;
+}
+
+async function startGame() {
+  if (gameRunning) return;
+  document.getElementById('btn-start').textContent = '⏹ STOP GAME';
+  document.getElementById('btn-start').onclick = stopGame;
+
+  // Countdown
+  for (const n of ['3','2','1','GO!']) {
+    document.getElementById('countdown-txt').textContent = n;
+    playSound('tick');
+    await delay(400);
+  }
+  document.getElementById('countdown-txt').textContent = '';
+
+  score = 0; misses = 0; combo = 0; maxCombo = 0;
+  timeLeft = gameDuration;
+  gameRunning = true;
+  updateDisplay();
+  tickTimer();
+  scheduleNextMole();
+}
+
+function stopGame() {
+  endGame();
+}
+
+function tickTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (!gameRunning) return;
+    timeLeft--;
+    document.getElementById('wam-timer').textContent = timeLeft;
+
+    if (timeLeft <= 10) {
+      document.getElementById('wam-timer').className = 'wam-timer danger';
+      playSound('tick');
+    }
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      endGame();
+    }
+  }, 1000);
+}
+
+function scheduleNextMole() {
+  if (!gameRunning) return;
+  // Deactivate previous
+  deactivateAllMoles();
+
+  // Pick random hole
+  const available = Array.from({length:9},(_,i)=>i);
+  const hole = available[Math.floor(Math.random() * available.length)];
+  activeMole = hole;
+  holes[hole].classList.add('active');
+
+  // Auto-deactivate after speed
+  clearTimeout(activeMoleTimeout);
+  activeMoleTimeout = setTimeout(() => {
+    if (gameRunning && holes[hole].classList.contains('active')) {
+      holes[hole].classList.remove('active');
+      misses++;
+      combo = 0;
+      document.getElementById('misses').textContent = misses;
+      document.getElementById('combo').textContent = combo;
+      document.getElementById('combo-display').textContent = '';
+      activeMole = -1;
+      scheduleNextMole();
+    }
+  }, moleSpeed * 0.9);
+
+  moleTimeout = setTimeout(scheduleNextMole, moleSpeed);
+}
+
+function deactivateAllMoles() {
+  holes.forEach(h => h.classList.remove('active'));
+  activeMole = -1;
+}
+
+// Whack handler
+holes.forEach((hole, i) => {
+  hole.addEventListener('click', () => {
+    if (!gameRunning || !hole.classList.contains('active')) return;
+    hole.classList.remove('active');
+    hole.classList.add('whacked');
+    setTimeout(() => hole.classList.remove('whacked'), 200);
+    playSound('whack');
+
+    combo++;
+    maxCombo = Math.max(maxCombo, combo);
+    const bonus = combo >= 5 ? 3 : combo >= 3 ? 2 : 1;
+    score += bonus;
+
+    document.getElementById('combo').textContent = combo;
+
+    if (combo > 1) {
+      document.getElementById('combo-display').textContent = `🔥 ${combo}x COMBO! +${bonus}`;
+    } else {
+      document.getElementById('combo-display').textContent = '';
+    }
+
+    document.getElementById('current-score').textContent = score;
+
+    // Floating score
+    showFloatingScore(hole, `+${bonus}`);
+  });
+});
+
+function showFloatingScore(hole, text) {
+  const rect = hole.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top}px;font-family:var(--font-display);font-size:1.2rem;color:var(--neon-orange);font-weight:900;pointer-events:none;z-index:9999;transform:translateX(-50%);animation:float-up 0.8s ease forwards`;
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+// Add float-up keyframe
+const style = document.createElement('style');
+style.textContent = `@keyframes float-up{0%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-50px)}}`;
+document.head.appendChild(style);
+
+function endGame() {
+  gameRunning = false;
+  clearInterval(timerInterval);
+  clearTimeout(moleTimeout);
+  clearTimeout(activeMoleTimeout);
+  deactivateAllMoles();
+
+  document.getElementById('btn-start').textContent = '▶ START GAME';
+  document.getElementById('btn-start').onclick = startGame;
+
+  // Save best
+  const bestKey = `gh_mole_best_${currentDiff}`;
+  const prev = parseInt(localStorage.getItem(bestKey)) || 0;
+  if (score > prev) localStorage.setItem(bestKey, score);
+
+  const s = getScore('mole');
+  if (score > (s.best||0)) {
+    saveScore('mole', { ...s, best: score });
+  }
+  incrementScore('mole', 'total');
+  refreshLeaderboard();
+
+  const isNew = score > prev;
+  document.getElementById('modal-emoji').textContent = score > 30 ? '🏆' : score > 15 ? '👍' : '🔨';
+  document.getElementById('modal-title').textContent = `SCORE: ${score}${isNew?' 🆕 NEW BEST!':''}`;
+  document.getElementById('modal-subtitle').textContent = score > 30 ? 'Outstanding mole-whacking skills!' : 'Keep practicing!';
+  document.getElementById('modal-stats').innerHTML = `
+    <div style="font-family:var(--font-display);font-size:0.8rem;color:var(--text-secondary);line-height:2">
+      <div>🎯 Score: <span style="color:var(--neon-orange)">${score}</span></div>
+      <div>❌ Missed: <span style="color:var(--neon-pink)">${misses}</span></div>
+      <div>🔥 Best Combo: <span style="color:var(--neon-yellow)">${maxCombo}x</span></div>
+    </div>`;
+
+  if (score > 50) launchConfetti(30);
+  modal.show();
+}
+
+function updateDisplay() {
+  document.getElementById('current-score').textContent = score;
+  document.getElementById('misses').textContent = misses;
+  document.getElementById('combo').textContent = combo;
+}
+
+function refreshLeaderboard() {
+  ['easy','medium','hard','chaos'].forEach(d => {
+    const key = `gh_mole_best_${d}`;
+    const el = document.getElementById(`lb-${d}`);
+    if (el) el.textContent = localStorage.getItem(key) || 0;
+  });
+}
+
+// Difficulty tabs
+document.querySelectorAll('.diff-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.diff-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    moleSpeed = parseInt(tab.dataset.speed);
+    gameDuration = parseInt(tab.dataset.duration);
+    currentDiff = tab.textContent.toLowerCase().trim();
+    initGame();
+  });
+});
+
+document.getElementById('btn-start').addEventListener('click', startGame);
+document.getElementById('modal-again').addEventListener('click', () => { initGame(); setTimeout(startGame, 300); });
+
+function delay(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+document.addEventListener('DOMContentLoaded', () => { initGame(); refreshLeaderboard(); });
+</script>
+</body>
+</html>
