@@ -192,7 +192,6 @@ All data is stored using **localStorage**:
 
 * 🌐 Global leaderboard (Firebase / Supabase)
 * 🎮 More games (Snake, 2048, Flappy Bird)
-* 🎵 Background music toggle
 * 👤 User profiles
 * 📱 Progressive Web App (PWA) support
 
